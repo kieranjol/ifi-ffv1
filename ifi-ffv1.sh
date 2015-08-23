@@ -41,7 +41,7 @@ echo '<inm:filmtapedvd>'Digital File'<\/inm:filmtapedvd>"' >> "$1.mkv_mediainfo.
 echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo.xml"
 
 #http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash
-echo "Your files have been converted but you'll ned more info."
+echo "Your files have been converted but you'll need more non embedded info."
 echo "reference number?"
 read "ref";
 echo '<inm:reference-number>'$ref'</inm:reference-number>' >> "$1.mkv_mediainfo.xml"
