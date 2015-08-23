@@ -12,11 +12,13 @@
  
 
 Instructions: <br>
-Copy script into user directory, eg admin or ifi-edit <br>
-open terminal <br>
-type `chmod a+x ifi-ffv1.sh`  <br>
-to run the program: <br>
-open terminal <br>
-type `./ifi-ffv1.sh <br>
-press space <br>
-drag and drop your v210.mov into the terminal and press ok <br>
+1. Copy script into user directory, eg admin or ifi-edit <br>
+2. Open terminal <br>
+3. type `chmod a+x ifi-ffv1.sh`  <br>
+4. to run the program: <br>
+5. open terminal <br>
+6. type `./ifi-ffv1.sh <br>
+7. press space <br>
+8. drag and drop your v210.mov into the terminal and press ok <br>
+
+Instructional video to follow
