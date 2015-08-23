@@ -1,5 +1,5 @@
 # ifi-ffv1
- FFv1/lossless verification/Inmagic DB Textworks mediainfo ingest
+ FFv1/lossless verification/Inmagic DB Textworks mediainfo ingest roughly inspired by Dave Rice's 'makelossless' https://github.com/dericed/mediamicroservices/blob/master/makelossless
  
  This will do the following to your v210.mov
  1. Compress using FFv1 version 3 inter-frame in a matroska wrapper
