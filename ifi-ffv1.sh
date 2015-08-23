@@ -1,6 +1,6 @@
 #!/bin/bash 
  
-ffmpeg -i "$1" -c:v ffv1 -level 3 -g 1 -c:a copy "$1.mkv" -f framemd5 "$1.framemd5"
+ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -c:a copy -dn "$1.mkv" -f framemd5 "$1.framemd5"
 ffmpeg -i "$1.mkv" -f framemd5 "$1"_output.framemd5
 
 #http://stackoverflow.com/a/1379904/2188572 looks like it might be a better option
@@ -36,7 +36,7 @@ sed -i -e "$SEDSTR" "$1.mkv_mediainfo.xml"
 sed -i '' '/^<inm/!d' "$1.mkv_mediainfo.xml"
 #sed -i '' '/^<\/inm/d' "$1.mkv_mediainfo.xml"
 
-#http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up. using bash-x shows + $'\r' hidden in the blank line
+#http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up.  using bash-x shows + $'\r' hidden in the blank line
 echo '<inm:filmtapedvd>'Digital File'<\/inm:filmtapedvd>"' >> "$1.mkv_mediainfo.xml"
 echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo.xml"
 
