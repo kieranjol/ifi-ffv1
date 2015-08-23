@@ -14,7 +14,7 @@ fi
 mediainfo -f --language=raw --output=XML "$1" > "$1_mediainfo.xml"
 mediainfo -f --language=raw --output=XML "$1.mkv" > "$1.mkv_mediainfo.xml"
 
-#generate qctools xml - both silent and audio options enabled for now. silent ones fail if put through the audio command
+#generate qctools xml - both silent and audio options enabled for now. silent ones fail if put through the audio commands
 ffprobe -f lavfi -i "movie=$1.mkv:s=v+a[in0][in1],[in0]signalstats=stat=tout+vrep+brng,cropdetect=reset=1,split[a][b];[a]field=top[a1];[b]field=bottom[b1],[a1][b1]psnr[out0];[in1]ebur128=metadata=1[out1]" -show_frames -show_versions -of xml=x=1:q=1 -noprivate | gzip > "$1.mkv.qctools.xml.gz"
 
 ffprobe -f lavfi -i "movie=$1.mkv,signalstats=stat=tout+vrep+brng,cropdetect=reset=1,split[a][b];[a]field=top[a1];[b]field=bottom[b1],[a1][b1]psnr" -show_frames -show_versions -of xml=x=1:q=1 -noprivate | gzip > "$1.mkv.qctools.xml.gz" 
