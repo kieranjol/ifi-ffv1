@@ -13,7 +13,7 @@ fi
 
 mediainfo -f --language=raw --output=XML "$1" > "$1_mediainfo.xml"
 mediainfo -f --language=raw --output=XML "$1.mkv" > "$1.mkv_mediainfo.xml" 
-mediainfo -f --language=raw --output=XML "$1" > "$1_v210_mediainfo.xml" 
+mediainfo -f --language=raw --output=XML "$1.mkv" > "$1_ffv1_mediainfo.xml" 
 
 #generate qctools xml ADD AN IF STATEMENT OR A CASE SELECT- both silent and audio options enabled for now. silent ones fail if put through the audio commands
 ffprobe -f lavfi -i "movie=$1.mkv:s=v+a[in0][in1],[in0]signalstats=stat=tout+vrep+brng,cropdetect=reset=1,split[a][b];[a]field=top[a1];[b]field=bottom[b1],[a1][b1]psnr[out0];[in1]ebur128=metadata=1[out1]" -show_frames -show_versions -of xml=x=1:q=1 -noprivate | gzip > "$1.mkv.qctools.xml.gz"
@@ -35,6 +35,9 @@ SEDSTR="$SEDSTR;"'s/<Height>/<inm:D-video-height >/g'
 SEDSTR="$SEDSTR;"'s/<\/Height>/<\/inm:D-video-height >/g'
 SEDSTR="$SEDSTR;"'s/<DisplayAspectRatio>/<inm:Display-Aspect-ratio >/g'
 SEDSTR="$SEDSTR;"'s/<\/DisplayAspectRatio>/<\/inm:Display-Aspect-ratio >/g'
+#this changes mmkv timecode  ; to :. Monitor this as it may mess other things up.
+SEDSTR="$SEDSTR;"'s/;/:/g'
+
 
 sed -i -e "$SEDSTR" "$1.mkv_mediainfo.xml"
 
