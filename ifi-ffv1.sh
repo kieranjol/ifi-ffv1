@@ -26,6 +26,7 @@ SEDSTR='s/<Codec>/<inm:Video-codec>/g'
 SEDSTR="$SEDSTR;"'s/<Duration_String4>/<inm:D-Duration>/g'
 SEDSTR="$SEDSTR;"'s/<Width>/<inm:Width>/g'
 SEDSTR="$SEDSTR;"'s/<\/Codec>/<\/inm:Video-codec>/g'
+#mkv duration has a ; for frames
 SEDSTR="$SEDSTR;"'s/<\/Duration_String4>/<\/inm:D-Duration>/g'
 SEDSTR="$SEDSTR;"'s/<\/Width>/<\/inm:Width>/g'
 SEDSTR="$SEDSTR;"'s/<\/FileExtension>/<\/inm:Wrapper>/g'
@@ -37,12 +38,18 @@ SEDSTR="$SEDSTR;"'s/<\/DisplayAspectRatio>/<\/inm:Display-Aspect-ratio >/g'
 
 sed -i -e "$SEDSTR" "$1.mkv_mediainfo.xml"
 
-#the first one deletes lines that do not start with in magic but doesn't work for long strings as they move to a new line. the second one deletes everything starting with inm. the ! negates the inclusion."
+#the first one deletes lines that do not start with in magic but doesn't work for long strings as they move to a new line. the second one deletes everything starting with inm. the ! negates the inclusion." http://stackoverflow.com/a/8068399/2188572
 sed -i '' '/^<inm/!d' "$1.mkv_mediainfo.xml"
 #sed -i '' '/^<\/inm/d' "$1.mkv_mediainfo.xml"
 
-#http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up.  using bash-x shows + $'\r' hidden in the blank line
-echo '<inm:filmtapedvd>'Digital File'<\/inm:filmtapedvd>"' >> "$1.mkv_mediainfo.xml"
+
+# the caret ^ indiciates start of line or not.  these functions will delete bad transforms.
+sed -i '' '/^<inm:Video-codec>MPEG-4/d' "$1.mkv_mediainfo.xml"
+sed -i '' '/^<inm:Video-codec>PCM/d' "$1.mkv_mediainfo.xml"
+sed -i '' '/^<inm:Video-codec>Matroska/d' "$1.mkv_mediainfo.xml"
+
+#http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up.  using bash-x shows + $'\r' hidden in the blank line also no need to close slashes, or whatever the term is when echoing
+echo '<inm:filmtapedvd>'Digital File'</inm:filmtapedvd>"' >> "$1.mkv_mediainfo.xml"
 echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo.xml"
 
 #http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash
@@ -106,6 +113,8 @@ do
 		echo "not valid option"
 	esac
 done	
+
+
 		
 
 #http://stackoverflow.com/a/21950403/2188572
