@@ -85,7 +85,7 @@ echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo.xml"
 
 echo "Process, eg Bestlight/Grade/OneLight etc?"
 read "proc";
-echo '<inm:Dprocess >'$cre'</inm:Dprocess>' >> "$1.mkv_mediainfo.xml"
+echo '<inm:Dprocess >'$proc'</inm:Dprocess>' >> "$1.mkv_mediainfo.xml"
 
 #awk '1; END {print "<inm:createdby>'$cre'<\/inm:createdby>"}' "$1" > tmp && mv tmp "$1"
 PS3="Type of acquisition? "
