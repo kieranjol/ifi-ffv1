@@ -28,8 +28,12 @@ SEDSTR="$SEDSTR;"'s/<Width>/<inm:Width>/g'
 SEDSTR="$SEDSTR;"'s/<\/Codec>/<\/inm:Video-codec>/g'
 SEDSTR="$SEDSTR;"'s/<\/Duration_String4>/<\/inm:D-Duration>/g'
 SEDSTR="$SEDSTR;"'s/<\/Width>/<\/inm:Width>/g'
-SEDSTR="$SEDSTR;"'s/<FileExtension>/<inm:Wrapper>/g'
 SEDSTR="$SEDSTR;"'s/<\/FileExtension>/<\/inm:Wrapper>/g'
+SEDSTR="$SEDSTR;"'s/<FileExtension>/<inm:Wrapper>/g'
+SEDSTR="$SEDSTR;"'s/<Height>/<inm:D-video-height >/g'
+SEDSTR="$SEDSTR;"'s/<\/Height>/<\/inm:D-video-height >/g'
+SEDSTR="$SEDSTR;"'s/<DisplayAspectRatio>/<inm:Display-Aspect-ratio >/g'
+SEDSTR="$SEDSTR;"'s/<\/DisplayAspectRatio>/<\/inm:Display-Aspect-ratio >/g'
 
 sed -i -e "$SEDSTR" "$1.mkv_mediainfo.xml"
 
@@ -78,6 +82,10 @@ echo '<inm:reference-number>'$ref'</inm:reference-number>' >> "$1.mkv_mediainfo.
 echo "Created By?"
 read "cre";
 echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo.xml"
+
+echo "Process, eg Bestlight/Grade/OneLight etc?"
+read "proc";
+echo '<inm:Dprocess >'$cre'</inm:Dprocess>' >> "$1.mkv_mediainfo.xml"
 
 #awk '1; END {print "<inm:createdby>'$cre'<\/inm:createdby>"}' "$1" > tmp && mv tmp "$1"
 PS3="Type of acquisition? "
