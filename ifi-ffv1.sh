@@ -1,5 +1,44 @@
 #!/bin/bash 
  
+#http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash
+echo "We will proceed with your FFV1 transcode but please fill in these Inmagic DB/Textworks fields first."
+echo "reference number?"
+read "ref";
+
+
+#awk '1; END {print "<inm:reference-number>'$ref'<\/inm:reference-number>"}' "$1" > tmp && mv tmp "$1"
+echo "Created By?"
+read "cre";
+
+
+echo "Process, eg Bestlight/Grade/OneLight etc?"
+read "proc";
+
+#awk '1; END {print "<inm:createdby>'$cre'<\/inm:createdby>"}' "$1" > tmp && mv tmp "$1"
+PS3="Type of acquisition? "
+select option in Generated_in_House Deposit Exit 
+do
+	case $option in
+		Generated_in_House)
+			tod="<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>"
+			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo.xml" 
+			break ;;				
+		Deposit)
+			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo.xml" 
+			tod="<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>"
+			break ;;
+		Exit)
+			#echo 'exiting'
+			break
+			;;
+		*)
+		echo "not valid option"
+	esac
+done	
+
+
+ 
+ 
 ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -c:a copy -dn "$1.mkv" -f framemd5 "$1.framemd5"
 ffmpeg -i "$1.mkv" -f framemd5 "$1"_output.framemd5
 
@@ -54,12 +93,12 @@ sed -i '' '/^<inm:Video-codec>Matroska/d' "$1.mkv_mediainfo.xml"
 #http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up.  using bash-x shows + $'\r' hidden in the blank line also no need to close slashes, or whatever the term is when echoing
 echo '<inm:filmtapedvd>'Digital File'</inm:filmtapedvd>"' >> "$1.mkv_mediainfo.xml"
 echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo.xml"
-
-#http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash
-echo "Your files have been converted but you'll need more non embedded info."
-echo "reference number?"
-read "ref";
 echo '<inm:reference-number>'$ref'</inm:reference-number>' >> "$1.mkv_mediainfo.xml"
+echo '<inm:Dprocess >'$proc'</inm:Dprocess>' >> "$1.mkv_mediainfo.xml"
+echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo.xml"
+echo "$tod" >> "$1.mkv_mediainfo.xml"
+
+
 
 #can be harvested via this script
 #<inm:Filename />
@@ -88,34 +127,6 @@ echo '<inm:reference-number>'$ref'</inm:reference-number>' >> "$1.mkv_mediainfo.
 #<inm:Title-Series />
 #<inm:CollectionTitle />
 
-#awk '1; END {print "<inm:reference-number>'$ref'<\/inm:reference-number>"}' "$1" > tmp && mv tmp "$1"
-echo "Created By?"
-read "cre";
-echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo.xml"
-
-echo "Process, eg Bestlight/Grade/OneLight etc?"
-read "proc";
-echo '<inm:Dprocess >'$proc'</inm:Dprocess>' >> "$1.mkv_mediainfo.xml"
-
-#awk '1; END {print "<inm:createdby>'$cre'<\/inm:createdby>"}' "$1" > tmp && mv tmp "$1"
-PS3="Type of acquisition? "
-select option in Generated_in_House Deposit Exit 
-do
-	case $option in
-		Generated_in_House)
-			echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo.xml" 
-			break ;;				
-		Deposit)
-			echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo.xml" 
-			break ;;
-		Exit)
-			echo 'exiting'
-			break
-			;;
-		*)
-		echo "not valid option"
-	esac
-done	
 
 
 		
