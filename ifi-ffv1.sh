@@ -5,11 +5,9 @@ echo "We will proceed with your FFV1 transcode but please fill in these Inmagic 
 echo "reference number?"
 read "ref";
 
-
 #awk '1; END {print "<inm:reference-number>'$ref'<\/inm:reference-number>"}' "$1" > tmp && mv tmp "$1"
 echo "Created By?"
 read "cre";
-
 
 echo "Process, eg Bestlight/Grade/OneLight etc?"
 read "proc";
@@ -21,10 +19,10 @@ do
 	case $option in
 		Generated_in_House)
 			tod="<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>"
-			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo.xml" 
+			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			break ;;				
 		Deposit)
-			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo.xml" 
+			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			tod="<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>"
 			break ;;
 		Exit)
@@ -36,22 +34,19 @@ do
 	esac
 done	
 
-
- 
- 
-ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -c:a copy -dn "$1.mkv" -f framemd5 "$1.framemd5"
+ffmpeg -i "$1" -map 0:v -map 0:a -c:v ffv1 -level 3 -g 1 -c:a copy -dn "$1.mkv" -f framemd5 "$1.framemd5"
 ffmpeg -i "$1.mkv" -f framemd5 "$1"_output.framemd5
 
 #http://stackoverflow.com/a/1379904/2188572 looks like it might be a better option
 if cmp -s "$1"_output.framemd5 "$1".framemd5; then
-	read -p "The transcode appears to be lossless. Press Enter to continue"
+	echo "The transcode appears to be lossless. Press Enter to continue"
 else
     read -p "The transcode does not appear to have been lossless. The framemd5s do not match. ABORT!"
 	exit 1
 fi
 
 mediainfo -f --language=raw --output=XML "$1" > "$1_mediainfo.xml"
-mediainfo -f --language=raw --output=XML "$1.mkv" > "$1.mkv_mediainfo.xml" 
+mediainfo -f --language=raw --output=XML "$1.mkv" > "$1.mkv_mediainfo_inmagic.xml" 
 mediainfo -f --language=raw --output=XML "$1.mkv" > "$1_ffv1_mediainfo.xml" 
 
 #generate qctools xml ADD AN IF STATEMENT OR A CASE SELECT- both silent and audio options enabled for now. silent ones fail if put through the audio commands
@@ -77,28 +72,24 @@ SEDSTR="$SEDSTR;"'s/<\/DisplayAspectRatio>/<\/inm:Display-Aspect-ratio >/g'
 #this changes mmkv timecode  ; to :. Monitor this as it may mess other things up.
 SEDSTR="$SEDSTR;"'s/;/:/g'
 
-
-sed -i -e "$SEDSTR" "$1.mkv_mediainfo.xml"
+sed -i -e "$SEDSTR" "$1.mkv_mediainfo_inmagic.xml"
 
 #the first one deletes lines that do not start with in magic but doesn't work for long strings as they move to a new line. the second one deletes everything starting with inm. the ! negates the inclusion." http://stackoverflow.com/a/8068399/2188572
-sed -i '' '/^<inm/!d' "$1.mkv_mediainfo.xml"
-#sed -i '' '/^<\/inm/d' "$1.mkv_mediainfo.xml"
-
+sed -i '' '/^<inm/!d' "$1.mkv_mediainfo_inmagic.xml"
+#sed -i '' '/^<\/inm/d' "$1.mkv_mediainfo_inmagic.xml"
 
 # the caret ^ indiciates start of line or not.  these functions will delete bad transforms.
-sed -i '' '/^<inm:Video-codec>MPEG-4/d' "$1.mkv_mediainfo.xml"
-sed -i '' '/^<inm:Video-codec>PCM/d' "$1.mkv_mediainfo.xml"
-sed -i '' '/^<inm:Video-codec>Matroska/d' "$1.mkv_mediainfo.xml"
+sed -i '' '/^<inm:Video-codec>MPEG-4/d' "$1.mkv_mediainfo_inmagic.xml"
+sed -i '' '/^<inm:Video-codec>PCM/d' "$1.mkv_mediainfo_inmagic.xml"
+sed -i '' '/^<inm:Video-codec>Matroska/d' "$1.mkv_mediainfo_inmagic.xml"
 
 #http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up.  using bash-x shows + $'\r' hidden in the blank line also no need to close slashes, or whatever the term is when echoing
-echo '<inm:filmtapedvd>'Digital File'</inm:filmtapedvd>"' >> "$1.mkv_mediainfo.xml"
-echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo.xml"
-echo '<inm:reference-number>'$ref'</inm:reference-number>' >> "$1.mkv_mediainfo.xml"
-echo '<inm:Dprocess >'$proc'</inm:Dprocess>' >> "$1.mkv_mediainfo.xml"
-echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo.xml"
-echo "$tod" >> "$1.mkv_mediainfo.xml"
-
-
+echo '<inm:filmtapedvd>'Digital File'</inm:filmtapedvd>"' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:reference-number>'$ref'</inm:reference-number>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Dprocess >'$proc'</inm:Dprocess>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
 
 #can be harvested via this script
 #<inm:Filename />
@@ -128,15 +119,12 @@ echo "$tod" >> "$1.mkv_mediainfo.xml"
 #<inm:CollectionTitle />
 
 
-
-		
-
 #http://stackoverflow.com/a/21950403/2188572
 sed -i '' '1i\
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
-' "$1.mkv_mediainfo.xml"
+' "$1.mkv_mediainfo_inmagic.xml"
 sed -i '' '2i\
 <inm:Results productTitle="Inmagic DB/TextWorks for SQL" productVersion="13.00" xmlns:inm="http://www.inmagic.com/webpublisher/query"> 
-' "$1.mkv_mediainfo.xml"
+' "$1.mkv_mediainfo_inmagic.xml"
 
 echo "You should now have an xml file that can be ingested into DB/Textworks for SQL"
