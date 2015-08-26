@@ -1,6 +1,7 @@
 #!/bin/bash 
  
 #http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash
+#this interview stores information that will be used further down in the script to inject metadata into the in magic ml
 echo "We will proceed with your FFV1 transcode but please fill in these Inmagic DB/Textworks fields first."
 echo "reference number?"
 read "ref";
@@ -32,19 +33,22 @@ do
 		*)
 		echo "not valid option"
 	esac
-done	
+done	 
+#this encodes a video to ffv1 version 3 intra frame in a matroska wrapper. It also exports a framemd5 sidecar of the original input. This decodes each frame, stores a checksum, which will aid with fixity and lossless verification.
 
-ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -c:a copy -dn "$1.mkv" -f framemd5 "$1.framemd5"
+ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -c:a copy -dn "$1.mkv" -f -an framemd5 "$1.framemd5"
+
+#this creates a Framemd5 sidecar of the ffv1.mkv output.
 ffmpeg -i "$1.mkv" -f framemd5 "$1"_output.framemd5
 
-#http://stackoverflow.com/a/1379904/2188572 looks like it might be a better option
+# this compares the two framemd5s and will abort if they are not identical. This will ensure that your ffv1 transcode will decode to the same bitstream. http://stackoverflow.com/a/1379904/2188572 looks like it might be a better option
 if cmp -s "$1"_output.framemd5 "$1".framemd5; then
 	echo "The transcode appears to be lossless. Press Enter to continue"
 else
     read -p "The transcode does not appear to have been lossless. The framemd5s do not match. ABORT!"
 	exit 1
 fi
-
+#this creates three mediainfo verbose sidecars. The first is if the input video. The second is of the ffv1.mkv, but it will be severely edited as this is the file that will be imported into inmagic. The third is the untouched metadata of the ffv1.mkv
 mediainfo -f --language=raw --output=XML "$1" > "$1_mediainfo.xml"
 mediainfo -f --language=raw --output=XML "$1.mkv" > "$1.mkv_mediainfo_inmagic.xml" 
 mediainfo -f --language=raw --output=XML "$1.mkv" > "$1_ffv1_mediainfo.xml" 
@@ -54,13 +58,13 @@ ffprobe -f lavfi -i "movie=$1.mkv:s=v+a[in0][in1],[in0]signalstats=stat=tout+vre
 
 ffprobe -f lavfi -i "movie=$1.mkv,signalstats=stat=tout+vrep+brng,cropdetect=reset=1,split[a][b];[a]field=top[a1];[b]field=bottom[b1],[a1][b1]psnr" -show_frames -show_versions -of xml=x=1:q=1 -noprivate | gzip > "$1.mkv.qctools.xml.gz" 
 
-#http://stackoverflow.com/questions/32160571/how-to-make-long-sed-script-leaner-and-more-readable-as-code/32160751?noredirect=1#comment52210665_32160751
-# remove redundant information, eg video codec showing up as PCM
+#This transforms mediainfo ml into a format that is readable by inmagic. The tags match the backend field names. http://stackoverflow.com/questions/32160571/how-to-make-long-sed-script-leaner-and-more-readable-as-code/32160751?noredirect=1#comment52210665_32160751
+# remove redundant information, eg video codec showing up as PCM. See issue.
 SEDSTR='s/<Codec>/<inm:Video-codec>/g'
 SEDSTR="$SEDSTR;"'s/<Duration_String4>/<inm:D-Duration>/g'
 SEDSTR="$SEDSTR;"'s/<Width>/<inm:D-video-width >/g'
 SEDSTR="$SEDSTR;"'s/<\/Codec>/<\/inm:Video-codec>/g'
-#mkv duration has a ; for frames
+#mkv Ntsc duration has a ; for frames
 SEDSTR="$SEDSTR;"'s/<\/Duration_String4>/<\/inm:D-Duration>/g'
 SEDSTR="$SEDSTR;"'s/<\/Width>/<\/inm:D-video-width >/g'
 SEDSTR="$SEDSTR;"'s/<\/FileExtension>/<\/inm:Wrapper>/g'
@@ -69,8 +73,8 @@ SEDSTR="$SEDSTR;"'s/<Height>/<inm:D-video-height >/g'
 SEDSTR="$SEDSTR;"'s/<\/Height>/<\/inm:D-video-height >/g'
 SEDSTR="$SEDSTR;"'s/<DisplayAspectRatio>/<inm:Display-Aspect-ratio >/g'
 SEDSTR="$SEDSTR;"'s/<\/DisplayAspectRatio>/<\/inm:Display-Aspect-ratio >/g'
-#this changes mmkv timecode  ; to :. Monitor this as it may mess other things up.
-SEDSTR="$SEDSTR;"'s/;/:/g'
+#this changes mkv timecode  ; to :. Monitor this as it may mess other things up. Removed for now.
+#SEDSTR="$SEDSTR;"'s/;/:/g'
 
 sed -i -e "$SEDSTR" "$1.mkv_mediainfo_inmagic.xml"
 
@@ -83,7 +87,7 @@ sed -i '' '/^<inm:Video-codec>MPEG-4/d' "$1.mkv_mediainfo_inmagic.xml"
 sed -i '' '/^<inm:Video-codec>PCM/d' "$1.mkv_mediainfo_inmagic.xml"
 sed -i '' '/^<inm:Video-codec>Matroska/d' "$1.mkv_mediainfo_inmagic.xml"
 
-#http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up.  using bash-x shows + $'\r' hidden in the blank line also no need to close slashes, or whatever the term is when echoing
+#http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a command not found error popping up.  using bash-x shows + $'\r' hidden in the blank line also no need to close slashes, or whatever the term is when echoing
 echo '<inm:Film-Or-Tape>'Digital File'</inm:Film-Or-Tape>"' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Reference-Number>'$ref'</inm:Reference-Number>' >> "$1.mkv_mediainfo_inmagic.xml"
@@ -114,8 +118,7 @@ echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
 #<inm:D-Checksum />
 
 #more in magic fields to add in
-#<inm:Title-Main />
-#<inm:Title-Series />
+
 #<inm:CollectionTitle />
 
 
