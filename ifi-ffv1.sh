@@ -1,6 +1,9 @@
-#!/bin/bash 
- 
-#http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash
+#!/bin/bash -x
+	
+#http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash 
+
+
+
 echo "We will proceed with your FFV1 transcode but please fill in these Inmagic DB/Textworks fields first."
 echo "reference number?"
 read "ref";
@@ -34,8 +37,9 @@ do
 	esac
 done	
 
-ffmpeg -i "$1" -map 0:v -map 0:a -c:v ffv1 -level 3 -g 1 -c:a copy -dn "$1.mkv" -f framemd5 "$1.framemd5"
+ffmpeg -i "$1" -map 0:v -map 0:a -c:v ffv1 -level 3 -g 1 -c:a copy -dn "$1.mkv" -f framemd5 "$1.framemd5" 
 ffmpeg -i "$1.mkv" -f framemd5 "$1"_output.framemd5
+
 
 #http://stackoverflow.com/a/1379904/2188572 looks like it might be a better option
 if cmp -s "$1"_output.framemd5 "$1".framemd5; then
@@ -127,4 +131,21 @@ sed -i '' '2i\
 <inm:Results productTitle="Inmagic DB/TextWorks for SQL" productVersion="13.00" xmlns:inm="http://www.inmagic.com/webpublisher/query"> 
 ' "$1.mkv_mediainfo_inmagic.xml"
 
+PS3="Pro res?"
+select choice in Y N
+do
+	case $choice in
+		Y)
+			ffmpeg -i "$1" -map 0:v -map 0:a -c:v prores -c:a copy -dn "$1_PRORES.mov"
+			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
+			break ;;				
+		N)
+			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml"
+			break ;;
+	esac
+done	
 echo "You should now have an xml file that can be ingested into DB/Textworks for SQL"
+
+
+
+
