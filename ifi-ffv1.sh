@@ -21,7 +21,7 @@ select option in Generated_in_House Deposit Exit
 do
 	case $option in
 		Generated_in_House)
-			tod="<inm:Type-Of-Deposit>7. Generated In House</inm:Type-Of-Deposit>"
+			tod="<inm:Type-Of-Deposit>6. Generated In House</inm:Type-Of-Deposit>"
 			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			break ;;				
 		Deposit)
@@ -104,9 +104,12 @@ sed -i '' '/^<inm:Video-codec>Matroska/d' "$1.mkv_mediainfo_inmagic.xml"
 #http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up.  using bash-x shows + $'\r' hidden in the blank line also no need to close slashes, or whatever the term is when echoing
 echo '<inm:Film-Or-Tape>'Digital File'</inm:Film-Or-Tape>"' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Donor>'Irish Film Institute'</inm:Donor>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Reference-Number>'$ref'</inm:Reference-Number>' >> "$1.mkv_mediainfo_inmagic.xml"
-echo '<inm:Dprocess >'$proc'</inm:Dprocess>' >> "$1.mkv_mediainfo_inmagic.xml"
-echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Dprocess >'$proc'</inm:Dprocess >' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Created-By>'$cre'</inm:Created-By>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:EditedNew>'$cre'</inm:EditedNew>' >> "$1.mkv_mediainfo_inmagic.xml"
+
 echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
 echo '</inm:Record>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '</inm:Recordset>' >> "$1.mkv_mediainfo_inmagic.xml"
