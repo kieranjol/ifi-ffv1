@@ -108,6 +108,9 @@ echo '<inm:reference-number>'$ref'</inm:reference-number>' >> "$1.mkv_mediainfo_
 echo '<inm:Dprocess >'$proc'</inm:Dprocess>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
+echo '</inm:Record>"' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '</inm:Recordset>'Digital File'</inm:filmtapedvd>"' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '</inm:Results>'Digital File'</inm:filmtapedvd>"' >> "$1.mkv_mediainfo_inmagic.xml"
 
 #can be harvested via this script
 #<inm:Filename />
@@ -144,6 +147,13 @@ sed -i '' '1i\
 sed -i '' '2i\
 <inm:Results productTitle="Inmagic DB/TextWorks for SQL" productVersion="13.00" xmlns:inm="http://www.inmagic.com/webpublisher/query"> 
 ' "$1.mkv_mediainfo_inmagic.xml"
+sed -i '' '3i\
+<inm:Recordset setCount="1"> 
+' "$1.mkv_mediainfo_inmagic.xml"
+sed -i '' '4i\
+<inm:Record setEntry="0">
+' "$1.mkv_mediainfo_inmagic.xml"
+
 #prints the contents of inmagic sml to terminal
 cat "$1.mkv_mediainfo_inmagic.xml" 
 
