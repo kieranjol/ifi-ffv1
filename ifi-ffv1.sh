@@ -21,12 +21,12 @@ select option in Generated_in_House Deposit Exit
 do
 	case $option in
 		Generated_in_House)
-			tod="<inm:Type-Of-Deposit>6. Generated In House</inm:Type-Of-Deposit>"
+			tod="<inm:Type-Of-Deposit>6. Generated in-house</inm:Type-Of-Deposit>"
 			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			break ;;				
 		Deposit)
 			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
-			tod="<inm:Type-Of-Deposit>3. Deposit</inm:Type-Of-Deposit>"
+			tod="<inm:Type-Of-Deposit>4. Deposit</inm:Type-Of-Deposit>"
 			break ;;
 		Exit)
 			#echo 'exiting'
