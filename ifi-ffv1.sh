@@ -163,7 +163,7 @@ awk '!a[$0]++' "$1.mkv_mediainfo_inmagic.xml" > "$1.mkv_mediainfo_inmagic_final.
 #prints the contents of inmagic sml to terminal
 cat "$1.mkv_mediainfo_inmagic_final.xml" 
 
-echo "You should now have an xml file that can be ingested into DB/Textworks for SQL"
+echo "You should now have an xml file that can be ingested into DB/Textworks for SQL. When importing into Inmagic, DO NOT enable 'Check for matching records'"
 
 
 
