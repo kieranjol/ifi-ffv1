@@ -109,6 +109,7 @@ echo '<inm:Reference-Number>'$ref'</inm:Reference-Number>' >> "$1.mkv_mediainfo_
 echo '<inm:DProcess >'$proc'</inm:DProcess >' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Created-By>'$cre'</inm:Created-By>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:EditedNew>'$cre'</inm:EditedNew>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Edited-By>'$cre'</inm:Edited-By>' >> "$1.mkv_mediainfo_inmagic.xml"
 
 echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
 echo '</inm:Record>' >> "$1.mkv_mediainfo_inmagic.xml"
