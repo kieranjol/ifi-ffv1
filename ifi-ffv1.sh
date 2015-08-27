@@ -21,12 +21,12 @@ select option in Generated_in_House Deposit Exit
 do
 	case $option in
 		Generated_in_House)
-			tod="<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>"
+			tod="<inm:Type-Of-Deposit>7. Generated In House</inm:Type-Of-Deposit>"
 			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			break ;;				
 		Deposit)
 			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
-			tod="<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>"
+			tod="<inm:Type-Of-Deposit>3. Deposit</inm:Type-Of-Deposit>"
 			break ;;
 		Exit)
 			#echo 'exiting'
@@ -76,11 +76,11 @@ ffprobe -f lavfi -i "movie=$1.mkv,signalstats=stat=tout+vrep+brng,cropdetect=res
 # remove redundant information, eg video codec showing up as PCM
 SEDSTR='s/<Codec>/<inm:Video-codec>/g'
 SEDSTR="$SEDSTR;"'s/<Duration_String4>/<inm:D-Duration>/g'
-SEDSTR="$SEDSTR;"'s/<Width>/<inm:Width>/g'
+SEDSTR="$SEDSTR;"'s/<Width>/<inm:D-video-width >/g'
 SEDSTR="$SEDSTR;"'s/<\/Codec>/<\/inm:Video-codec>/g'
 #mkv duration has a ; for frames
 SEDSTR="$SEDSTR;"'s/<\/Duration_String4>/<\/inm:D-Duration>/g'
-SEDSTR="$SEDSTR;"'s/<\/Width>/<\/inm:Width>/g'
+SEDSTR="$SEDSTR;"'s/<\/Width>/<\/inm:D-video-width >/g'
 SEDSTR="$SEDSTR;"'s/<\/FileExtension>/<\/inm:Wrapper>/g'
 SEDSTR="$SEDSTR;"'s/<FileExtension>/<inm:Wrapper>/g'
 SEDSTR="$SEDSTR;"'s/<Height>/<inm:D-video-height >/g'
@@ -102,9 +102,9 @@ sed -i '' '/^<inm:Video-codec>PCM/d' "$1.mkv_mediainfo_inmagic.xml"
 sed -i '' '/^<inm:Video-codec>Matroska/d' "$1.mkv_mediainfo_inmagic.xml"
 
 #http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up.  using bash-x shows + $'\r' hidden in the blank line also no need to close slashes, or whatever the term is when echoing
-echo '<inm:filmtapedvd>'Digital File'</inm:filmtapedvd>"' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Film-Or-Tape>'Digital File'</inm:Film-Or-Tape>"' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo_inmagic.xml"
-echo '<inm:reference-number>'$ref'</inm:reference-number>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Reference-Number>'$ref'</inm:Reference-Number>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Dprocess >'$proc'</inm:Dprocess>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
