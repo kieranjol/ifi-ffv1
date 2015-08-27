@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash 
 	
 #http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash 
 
@@ -34,6 +34,20 @@ do
 			;;
 		*)
 		echo "not valid option"
+	esac
+done	
+
+PS3="Pro res?"
+select choice in Y N
+do
+	case $choice in
+		Y)
+			ffmpeg -i "$1" -map 0:v -map 0:a -c:v prores -c:a copy -dn "$1_PRORES.mov"
+			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
+			break ;;				
+		N)
+			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml"
+			break ;;
 	esac
 done	
 
@@ -131,19 +145,7 @@ sed -i '' '2i\
 <inm:Results productTitle="Inmagic DB/TextWorks for SQL" productVersion="13.00" xmlns:inm="http://www.inmagic.com/webpublisher/query"> 
 ' "$1.mkv_mediainfo_inmagic.xml"
 
-PS3="Pro res?"
-select choice in Y N
-do
-	case $choice in
-		Y)
-			ffmpeg -i "$1" -map 0:v -map 0:a -c:v prores -c:a copy -dn "$1_PRORES.mov"
-			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
-			break ;;				
-		N)
-			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml"
-			break ;;
-	esac
-done	
+
 echo "You should now have an xml file that can be ingested into DB/Textworks for SQL"
 
 
