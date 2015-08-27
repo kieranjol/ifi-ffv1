@@ -102,7 +102,7 @@ sed -i '' '/^<inm:Video-codec>PCM/d' "$1.mkv_mediainfo_inmagic.xml"
 sed -i '' '/^<inm:Video-codec>Matroska/d' "$1.mkv_mediainfo_inmagic.xml"
 
 #http://stackoverflow.com/a/7362610/2188572 Having spaces after the echo print will result in everything output just fine, but a common not found error popping up.  using bash-x shows + $'\r' hidden in the blank line also no need to close slashes, or whatever the term is when echoing
-echo '<inm:Film-Or-Tape>'Digital File'</inm:Film-Or-Tape>"' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Film-Or-Tape>'Digital File'</inm:Film-Or-Tape>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Donor>'Irish Film Institute'</inm:Donor>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Reference-Number>'$ref'</inm:Reference-Number>' >> "$1.mkv_mediainfo_inmagic.xml"
