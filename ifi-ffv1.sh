@@ -144,7 +144,8 @@ sed -i '' '1i\
 sed -i '' '2i\
 <inm:Results productTitle="Inmagic DB/TextWorks for SQL" productVersion="13.00" xmlns:inm="http://www.inmagic.com/webpublisher/query"> 
 ' "$1.mkv_mediainfo_inmagic.xml"
-
+#prints the contents of inmagic sml to terminal
+cat "$1.mkv_mediainfo_inmagic.xml" 
 
 echo "You should now have an xml file that can be ingested into DB/Textworks for SQL"
 
