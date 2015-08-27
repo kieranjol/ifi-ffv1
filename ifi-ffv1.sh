@@ -108,9 +108,9 @@ echo '<inm:reference-number>'$ref'</inm:reference-number>' >> "$1.mkv_mediainfo_
 echo '<inm:Dprocess >'$proc'</inm:Dprocess>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:createdby>'$cre'</inm:createdby>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
-echo '</inm:Record>"' >> "$1.mkv_mediainfo_inmagic.xml"
-echo '</inm:Recordset>'Digital File'</inm:filmtapedvd>"' >> "$1.mkv_mediainfo_inmagic.xml"
-echo '</inm:Results>'Digital File'</inm:filmtapedvd>"' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '</inm:Record>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '</inm:Recordset>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '</inm:Results>' >> "$1.mkv_mediainfo_inmagic.xml"
 
 #can be harvested via this script
 #<inm:Filename />
