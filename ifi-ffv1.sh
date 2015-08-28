@@ -42,7 +42,7 @@ select choice in Y N
 do
 	case $choice in
 		Y)
-			ffmpeg -i "$1" -map 0 -c:v prores -c:a copy -dn "$1_PRORES.mov"
+			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn "$1_PRORES.mov"
 			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			break ;;				
 		N)
@@ -51,7 +51,7 @@ do
 	esac
 done	
 
-ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -c:a copy -dn "$1.mkv" -f framemd5 -an "$1.framemd5" 
+ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -aspect 4:3 -c:a copy -dn "$1.mkv" -f framemd5 -an "$1.framemd5" 
 ffmpeg -i "$1.mkv" -f  framemd5 -an "$1"_output.framemd5
 
 
