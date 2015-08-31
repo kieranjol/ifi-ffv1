@@ -11,6 +11,7 @@
  7. Ask the user for non embedded administrative metadata
  8. Generate md5 checksums of all files in package
  9. Move files into subfolders
+ 10. Create BITC h264 with framerate detection via ffprobe
  
 
 Instructions: <br>
