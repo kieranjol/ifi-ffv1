@@ -18,12 +18,16 @@ else
 	mkdir "$sourcepath/$filenoext/inmagic"
 	mkdir "$sourcepath/$filenoext/fixity"
 	mkdir "$sourcepath/$filenoext/video"
+	mkdir "$sourcepath/$filenoext/mezzanine"
+	mkdir "$sourcepath/$filenoext/proxy"
 fi
 provenance="$sourcepath/$filenoext/provenance"
 inmagic="$sourcepath/$filenoext/inmagic"
 fixity="$sourcepath/$filenoext/fixity"
 tmp="$sourcepath/$filenoext/tmp"
 video="$sourcepath/$filenoext/video"
+mezzanine="$sourcepath/$filenoext/mezzanine"
+proxy="$sourcepath/$filenoext/proxy"
 
 
 
@@ -64,17 +68,33 @@ do
 	esac
 done	
 
-PS3="Pro res?"
-select choice in Y N
+PS3="Pro res/BITC h264 or both?"
+select choice in None Prores H264 Both 
 do
 	case $choice in
-		Y)
-			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn "$1_PRORES.mov"
-			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
-			break ;;				
-		N)
+		None)
 			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml"
 			break ;;
+		Prores)
+			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn ""$mezzanine"/"$filenoext"_PRORES.mov"
+			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
+			break ;;	
+		H264)
+		#https://trac.ffmpeg.org/wiki/FFprobeTips
+		framerate=($(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=noprint_wrappers=1:nokey=1 "$1"))
+
+
+		#https://trac.ffmpeg.org/wiki/FFprobeTips
+		ffmpeg -i "$1" -c:v libx264 -crf 23 -pix_fmt yuv420p -vf drawtext="fontsize=45":"fontfile=/Library/Fonts/Arial\ Black.ttf:fontcolor=white:timecode='00\:00\:00\:00':rate=$framerate:boxcolor=0x000000AA:box=1:x=360-text_w/2:y=480" ""$proxy"/"$filenoext"_BITC.mov"
+		break;;
+		
+		Both)
+			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn ""$mezzanine"/"$filenoext"_PRORES.mov"
+			framerate=($(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=noprint_wrappers=1:nokey=1 "$1"))
+			ffmpeg -i "$1" -c:v libx264 -crf 23 -pix_fmt yuv420p -vf drawtext="fontsize=45":"fontfile=/Library/Fonts/Arial\ Black.ttf:fontcolor=white:timecode='00\:00\:00\:00':rate=$framerate:boxcolor=0x000000AA:box=1:x=360-text_w/2:y=480" ""$proxy"/"$filenoext"_BITC.mov"
+			break;;
+			
+		
 	esac
 done	
 
