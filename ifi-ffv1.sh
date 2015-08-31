@@ -143,6 +143,9 @@ echo '<inm:DProcess >'$proc'</inm:DProcess >' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Created-By>'$cre'</inm:Created-By>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:EditedNew>'$cre'</inm:EditedNew>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Edited-By>'$cre'</inm:Edited-By>' >> "$1.mkv_mediainfo_inmagic.xml"
+#md5 xml injection http://stackoverflow.com/a/5773761/2188572
+md5=($(md5sum "$1.mkv"))
+echo '<inm:D-Checksum />'$md5'</inm:D-Checksum >' >> "$1.mkv_mediainfo_inmagic.xml"
 
 echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
 echo '</inm:Record>' >> "$1.mkv_mediainfo_inmagic.xml"
@@ -194,12 +197,25 @@ sed -i '' '4i\
 awk '!a[$0]++' "$1.mkv_mediainfo_inmagic.xml" > "$1.mkv_mediainfo_inmagic_final.xml"
 
 #prints the contents of inmagic sml to terminal
+
+
+
 cat "$1.mkv_mediainfo_inmagic_final.xml" 
+
+
+
+
 mv "$1.mkv_mediainfo_inmagic_final.xml" "$inmagic"
 mv "$1.mkv_mediainfo_inmagic.xml" "$tmp"
 mv "$1.mkv_mediainfo_inmagic.xml.backup" "$tmp"
 mv "$1.mkv" "$video"
 mv "$1_ffv1_mediainfo.xml" "$video"
+
+#change dir is necessary as relative paths don't seem to work well with recursive hashes
+cd "$sourcepath"
+#ler - l=relative paths e=shows time remaining r=recursive
+md5deep -ler "$filenoext" > "$sourcepath/$filenoext.md5"
+
 
 echo "You should now have an xml file that can be ingested into DB/Textworks for SQL. When importing into Inmagic, DO NOT enable 'Check for matching records'"
 
