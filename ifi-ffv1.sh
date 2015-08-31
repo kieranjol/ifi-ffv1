@@ -144,7 +144,7 @@ echo '<inm:Created-By>'$cre'</inm:Created-By>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:EditedNew>'$cre'</inm:EditedNew>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Edited-By>'$cre'</inm:Edited-By>' >> "$1.mkv_mediainfo_inmagic.xml"
 #md5 xml injection http://stackoverflow.com/a/5773761/2188572
-md5=($(md5sum "$1.mkv"))
+md5=($(md5deep "$1.mkv"))
 echo '<inm:D-Checksum />'$md5'</inm:D-Checksum >' >> "$1.mkv_mediainfo_inmagic.xml"
 
 echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
