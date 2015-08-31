@@ -1,16 +1,18 @@
-#!/bin/bash -x
+#!/bin/bash
 	
 #http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash 
-
 #http://stackoverflow.com/a/965072/2188572
-
-sourcepath="$(dirname "$1")"
+#This stores various file/path names for later use.
+sourcepath="$(dirname "$1")" 
 filename="$(basename "$1")"
+#Stores just the filename without the .extension. 
 filenoext="${filename%.*}"
-echo $filenoext
+#check if sidecar folder already exists. if it does, abort!
 if [ -d "$sourcepath/$filenoext" ]; then
 	echo "It looks like these files already exist, aborting.";
 	exit 1
+
+	#makes loads of directories for later use. some of these should only be created if various options are selected
 else
 	mkdir "$sourcepath/$filenoext"
 	mkdir "$sourcepath/$filenoext/tmp"
@@ -21,6 +23,7 @@ else
 	mkdir "$sourcepath/$filenoext/mezzanine"
 	mkdir "$sourcepath/$filenoext/proxy"
 fi
+#Creating variables for the directories to make life easier later on.
 provenance="$sourcepath/$filenoext/provenance"
 inmagic="$sourcepath/$filenoext/inmagic"
 fixity="$sourcepath/$filenoext/fixity"
@@ -29,12 +32,7 @@ video="$sourcepath/$filenoext/video"
 mezzanine="$sourcepath/$filenoext/mezzanine"
 proxy="$sourcepath/$filenoext/proxy"
 
-
-
-
-
-
-
+#Interview looking for non embedded metadata which will later be added to inmagic xml.
 echo "We will proceed with your FFV1 transcode but please fill in these Inmagic DB/Textworks fields first."
 echo "reference number?"
 read "ref";
@@ -47,6 +45,7 @@ echo "Process, eg Bestlight/Grade/OneLight etc?"
 read "proc";
 
 #awk '1; END {print "<inm:createdby>'$cre'<\/inm:createdby>"}' "$1" > tmp && mv tmp "$1"
+#Multiple choice.
 PS3="Type of acquisition? "
 select option in Generated_in_House Deposit Exit 
 do
@@ -68,6 +67,7 @@ do
 	esac
 done	
 
+#mezzanine/proxy creation. the proxy does a fps check so that the timecode is correct. the timecode will only appear in the correct position for PAL video.
 PS3="Pro res/BITC h264 or both?"
 select choice in None Prores H264 Both 
 do
@@ -97,12 +97,14 @@ do
 		
 	esac
 done	
-
+#transcode to ffv1 and make framemd5 of source
 ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -aspect 4:3 -c:a copy -dn "$1.mkv" -f framemd5 -an "$1.framemd5" 
+#make framemd5 of ffv1
 ffmpeg -i "$1.mkv" -f  framemd5 -an "$1"_output.framemd5
 
 
 #http://stackoverflow.com/a/1379904/2188572 looks like it might be a better option
+#compare both framemd5s and only continue if identical
 if cmp -s "$1"_output.framemd5 "$1".framemd5; then
 	echo "The transcode appears to be lossless. Press Enter to continue"
 else
@@ -110,14 +112,16 @@ else
 	exit 1
 fi
 
+#move framemd5s to appropriate location
 mv "$1".framemd5 "$provenance"
 mv "$1"_output.framemd5 "$fixity"
 
-
+#mediainfo of source and move to provenance folder. reduce this to one line without MV
 mediainfo -f --language=raw --output=XML "$1" > "$1_mediainfo.xml"
 mv "$1_mediainfo.xml" "$provenance"
+#mediainfo of ffv1 which will ultimately be transformed into the inmagic xml.
 mediainfo -f --language=raw --output=XML "$1.mkv" > "$1.mkv_mediainfo_inmagic.xml" 
-
+#mediainfo of source . I don't think that this is used again, so maybe it could be moved to video folder earlier?
 mediainfo -f --language=raw --output=XML "$1.mkv" > "$1_ffv1_mediainfo.xml" 
 
 #generate qctools xml ADD AN IF STATEMENT OR A CASE SELECT- both silent and audio options enabled for now. silent ones fail if put through the audio commands
