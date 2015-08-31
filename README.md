@@ -7,11 +7,14 @@
  3. Tell you if your transcode is lossless or not
  4. run verbose mediainfos on both the v210.mov and the ffv1.mkv
  5. generate a qctools xml document
- 6. convert mediainfo xml tags into Inmagic DB/Textworks for SQL compliant elements
+ 6. convert mediainfo xml tags into Inmagic DB/Textworks for SQL compliant elements and add md5
  7. Ask the user for non embedded administrative metadata
+ 8. Generate md5 checksums of all files in package
+ 9. Move files into subfolders
  
 
 Instructions: <br>
+The following dependencies need to be installed via Homebrew: ffmpeg, ffplay, ffprobe, mediainfo, md5deep. <br>
 1. Copy script into user directory, eg admin or ifi-edit <br>
 2. Open terminal <br>
 3. type `chmod a+x ifi-ffv1.sh`  <br>
