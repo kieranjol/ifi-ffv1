@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 	
 #http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash 
 #http://stackoverflow.com/a/965072/2188572
@@ -76,7 +76,7 @@ do
 			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml"
 			break ;;
 		Prores)
-			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn ""$mezzanine"/"$filenoext"_PRORES.mov"
+			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn "$mezzanine/${filenoext}_PRORES.mov"
 			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			break ;;	
 		H264)
@@ -85,13 +85,50 @@ do
 
 
 		#https://trac.ffmpeg.org/wiki/FFprobeTips
-		ffmpeg -i "$1" -c:v libx264 -crf 23 -pix_fmt yuv420p -vf drawtext="fontsize=45":"fontfile=/Library/Fonts/Arial\ Black.ttf:fontcolor=white:timecode='00\:00\:00\:00':rate=$framerate:boxcolor=0x000000AA:box=1:x=360-text_w/2:y=480" ""$proxy"/"$filenoext"_BITC.mov"
+		IFS=: read -a timecode < <(ffprobe -v error -show_entries stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1")
+		printf -v timecode "'%s\:%s\:%s\:%s'" "${timecode[@]}"
+		echo "$timecode"
+
+		drawtext_options=(
+		    fontsize=45
+		    fontfile="/Library/Fonts/Arial Black.ttf"
+		    fontcolor=white
+		    timecode="$timecode"
+		    rate="$framerate"
+		    boxcolor=0x000000AA
+		    box=1
+		    x=360-text_w/2
+		    y=480
+		)
+
+		drawtext_options=$(IFS=:; echo "${drawtext_options[*]}")
+		ffmpeg -i "$1" -c:v libx264 -crf 23 -pix_fmt yuv420p -vf \
+		    drawtext="$drawtext_options" \
+		    "$proxy/${filenoext}_BITC.mov"
 		break;;
 		
 		Both)
-			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn ""$mezzanine"/"$filenoext"_PRORES.mov"
-			framerate=($(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=noprint_wrappers=1:nokey=1 "$1"))
-			ffmpeg -i "$1" -c:v libx264 -crf 23 -pix_fmt yuv420p -vf drawtext="fontsize=45":"fontfile=/Library/Fonts/Arial\ Black.ttf:fontcolor=white:timecode='00\:00\:00\:00':rate=$framerate:boxcolor=0x000000AA:box=1:x=360-text_w/2:y=480" ""$proxy"/"$filenoext"_BITC.mov"
+			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn "$mezzanine/${filenoext}_PRORES.mov"
+			IFS=: read -a timecode < <(ffprobe -v error -show_entries stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1")
+			printf -v timecode "'%s\:%s\:%s\:%s'" "${timecode[@]}"
+			echo "$timecode"
+
+			drawtext_options=(
+			    fontsize=45
+			    fontfile="/Library/Fonts/Arial Black.ttf"
+			    fontcolor=white
+			    timecode="$timecode"
+			    rate=25/1
+			    boxcolor=0x000000AA
+			    box=1
+			    x=360-text_w/2
+			    y=480
+			)
+
+			drawtext_options=$(IFS=:; echo "${drawtext_options[*]}")
+			ffmpeg -i "$1" -c:v libx264 -crf 23 -pix_fmt yuv420p -vf \
+			    drawtext="$drawtext_options" \
+			    "$proxy/${filenoext}_BITC.mov"
 			break;;
 			
 		
