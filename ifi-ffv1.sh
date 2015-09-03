@@ -168,8 +168,10 @@ ffprobe -f lavfi -i "movie=$1.mkv,signalstats=stat=tout+vrep+brng,cropdetect=res
 mv "$1.mkv.qctools.xml.gz" "$video"
 #http://stackoverflow.com/questions/32160571/how-to-make-long-sed-script-leaner-and-more-readable-as-code/32160751?noredirect=1#comment52210665_32160751
 # remove redundant information, eg video codec showing up as PCM
-SEDSTR='s/<Codec>/<inm:Video-codec>/g'
-SEDSTR="$SEDSTR;"'s/<Duration_String4>/<inm:D-Duration>/g'
+#Bad code, will change to xml transforms at some stage :[
+SEDSTR='s/<Duration_String4>/<inm:D-Duration>/g'
+SEDSTR="$SEDSTR;"'s/<Codec>PCM<\/Codec>/<inm:D-Audio-codec>PCM<\/inm:D-Audio-codec>/g'
+SEDSTR="$SEDSTR;"'s/<Codec>/<inm:Video-codec>/g'
 SEDSTR="$SEDSTR;"'s/<Width>/<inm:D-video-width >/g'
 SEDSTR="$SEDSTR;"'s/<\/Codec>/<\/inm:Video-codec>/g'
 #mkv duration has a ; for frames
