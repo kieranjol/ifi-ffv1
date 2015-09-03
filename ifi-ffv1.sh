@@ -44,6 +44,9 @@ read "cre";
 echo "Process, eg Bestlight/Grade/OneLight etc?"
 read "proc";
 
+echo "Source Accession Number? Please retrospectively accesion the item if required"
+read "acc";
+
 #awk '1; END {print "<inm:createdby>'$cre'<\/inm:createdby>"}' "$1" > tmp && mv tmp "$1"
 #Multiple choice.
 PS3="Type of acquisition? "
@@ -202,6 +205,7 @@ echo '<inm:Film-Or-Tape>'Digital File'</inm:Film-Or-Tape>' >> "$1.mkv_mediainfo_
 echo '<inm:Master-Viewing>'Preservation Master'</inm:Master-Viewing>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Donor>'Irish Film Institute'</inm:Donor>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Reference-Number>'$ref'</inm:Reference-Number>' >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:AccessionNumber>'$acc'</inm:AccessionNumber>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:DProcess >'$proc'</inm:DProcess >' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:Created-By>'$cre'</inm:Created-By>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '<inm:EditedNew>'$cre'</inm:EditedNew>' >> "$1.mkv_mediainfo_inmagic.xml"
