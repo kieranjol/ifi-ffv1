@@ -179,6 +179,8 @@ SEDSTR="$SEDSTR;"'s/<Width>/<inm:D-video-width >/g'
 SEDSTR="$SEDSTR;"'s/<\/Codec>/<\/inm:Video-codec>/g'
 #mkv duration has a ; for frames
 SEDSTR="$SEDSTR;"'s/<\/Duration_String4>/<\/inm:D-Duration>/g'
+SEDSTR="$SEDSTR;"'s/<File_Size_String4>/<inm:D-File-Size >/g'
+SEDSTR="$SEDSTR;"'s/<\/File_Size_String4>/<\/inm:D-File-Size >/g'
 SEDSTR="$SEDSTR;"'s/<\/Width>/<\/inm:D-video-width >/g'
 SEDSTR="$SEDSTR;"'s/<\/FileExtension>/<\/inm:Wrapper>/g'
 SEDSTR="$SEDSTR;"'s/<FileExtension>/<inm:Wrapper>/g'
