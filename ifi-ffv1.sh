@@ -5,14 +5,16 @@
 #This stores various file/path names for later use.
 sourcepath="$(dirname "$1")" 
 filename="$(basename "$1")"
+
 #Stores just the filename without the .extension. 
 filenoext="${filename%.*}"
+
 #check if sidecar folder already exists. if it does, abort!
 if [ -d "$sourcepath/$filenoext" ]; then
 	echo "It looks like these files already exist, aborting.";
 	exit 1
 
-	#makes loads of directories for later use. some of these should only be created if various options are selected
+#makes loads of directories for later use. some of these should only be created if various options are selected
 else
 	mkdir "$sourcepath/$filenoext"
 	mkdir "$sourcepath/$filenoext/tmp"
@@ -23,6 +25,7 @@ else
 	mkdir "$sourcepath/$filenoext/mezzanine"
 	mkdir "$sourcepath/$filenoext/proxy"
 fi
+
 #Creating variables for the directories to make life easier later on.
 provenance="$sourcepath/$filenoext/provenance"
 inmagic="$sourcepath/$filenoext/inmagic"
@@ -37,7 +40,6 @@ echo "We will proceed with your FFV1 transcode but please fill in these Inmagic 
 echo "reference number?"
 read "ref";
 
-#awk '1; END {print "<inm:reference-number>'$ref'<\/inm:reference-number>"}' "$1" > tmp && mv tmp "$1"
 echo "Created By?"
 read "cre";
 
@@ -47,22 +49,18 @@ read "proc";
 echo "Source Accession Number? Please retrospectively accesion the item if required"
 read "acc";
 
-#awk '1; END {print "<inm:createdby>'$cre'<\/inm:createdby>"}' "$1" > tmp && mv tmp "$1"
-#Multiple choice.
+#Multiple choice. This currently doesn't print the question which could be confusing for user.
 PS3="Type of acquisition? "
 select option in Generated_in_House Deposit Exit 
 do
 	case $option in
 		Generated_in_House)
 			tod="<inm:Type-Of-Deposit>6. Generated in-house</inm:Type-Of-Deposit>"
-			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			break ;;				
 		Deposit)
-			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			tod="<inm:Type-Of-Deposit>4. Deposit</inm:Type-Of-Deposit>"
 			break ;;
 		Exit)
-			#echo 'exiting'
 			break
 			;;
 		*)
@@ -70,17 +68,16 @@ do
 	esac
 done	
 
-#mezzanine/proxy creation. the proxy does a fps check so that the timecode is correct. the timecode will only appear in the correct position for PAL video.
-PS3="Pro res/BITC h264 or both?"
+#mezzanine/proxy creation. the proxy does a fps check so that the timecode is correct. 
+#The timecode will only appear in the correct position for PAL video.
+PS3="Prores/BITC h264 or both?"
 select choice in None Prores H264 Both 
 do
 	case $choice in
 		None)
-			#echo "<inm:typeofacquisition>3. Deposit</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml"
 			break ;;
 		Prores)
 			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn "$mezzanine/${filenoext}_PRORES.mov"
-			#echo "<inm:typeofacquisition>7. Generated In House</inm:typeofacquisition>" >> "$1.mkv_mediainfo_inmagic.xml" 
 			break ;;	
 		H264)
 		#https://trac.ffmpeg.org/wiki/FFprobeTips
@@ -159,25 +156,26 @@ mv "$1"_output.framemd5 "$fixity"
 #mediainfo of source and move to provenance folder. reduce this to one line without MV
 mediainfo -f --language=raw --output=XML "$1" > "$1_mediainfo.xml"
 mv "$1_mediainfo.xml" "$provenance"
+
 #mediainfo of ffv1 which will ultimately be transformed into the inmagic xml.
 mediainfo -f --language=raw --output=XML "$1.mkv" > "$1.mkv_mediainfo_inmagic.xml" 
+
 #mediainfo of source . I don't think that this is used again, so maybe it could be moved to video folder earlier?
 mediainfo -f --language=raw --output=XML "$1.mkv" > "$1_ffv1_mediainfo.xml" 
 
 #generate qctools xml ADD AN IF STATEMENT OR A CASE SELECT- both silent and audio options enabled for now. silent ones fail if put through the audio commands
 #ffprobe -f lavfi -i "movie=$1.mkv:s=v+a[in0][in1],[in0]signalstats=stat=tout+vrep+brng,cropdetect=reset=1,split[a][b];[a]field=top[a1];[b]field=bottom[b1],[a1][b1]psnr[out0];[in1]ebur128=metadata=1[out1]" -show_frames -show_versions -of xml=x=1:q=1 -noprivate | gzip > "$1.mkv.qctools.xml.gz"
-
 ffprobe -f lavfi -i "movie=$1.mkv,signalstats=stat=tout+vrep+brng,cropdetect=reset=1,split[a][b];[a]field=top[a1];[b]field=bottom[b1],[a1][b1]psnr" -show_frames -show_versions -of xml=x=1:q=1 -noprivate | gzip > "$1.mkv.qctools.xml.gz" 
 mv "$1.mkv.qctools.xml.gz" "$video"
+
 #http://stackoverflow.com/questions/32160571/how-to-make-long-sed-script-leaner-and-more-readable-as-code/32160751?noredirect=1#comment52210665_32160751
-# remove redundant information, eg video codec showing up as PCM
 #Bad code, will change to xml transforms at some stage :[
 SEDSTR='s/<Duration_String4>/<inm:D-Duration>/g'
 SEDSTR="$SEDSTR;"'s/<Codec>PCM<\/Codec>/<inm:D-Audio-codec>PCM<\/inm:D-Audio-codec>/g'
 SEDSTR="$SEDSTR;"'s/<Codec>/<inm:Video-codec>/g'
 SEDSTR="$SEDSTR;"'s/<Width>/<inm:D-video-width >/g'
 SEDSTR="$SEDSTR;"'s/<\/Codec>/<\/inm:Video-codec>/g'
-#mkv duration has a ; for frames
+#mkv duration has a ; for NTSC drop frames
 SEDSTR="$SEDSTR;"'s/<\/Duration_String4>/<\/inm:D-Duration>/g'
 SEDSTR="$SEDSTR;"'s/<File_Size_String4>/<inm:D-File-Size >/g'
 SEDSTR="$SEDSTR;"'s/<\/File_Size_String4>/<\/inm:D-File-Size >/g'
@@ -189,11 +187,12 @@ SEDSTR="$SEDSTR;"'s/<\/Height>/<\/inm:D-video-height >/g'
 SEDSTR="$SEDSTR;"'s/<DisplayAspectRatio>/<inm:Display-Aspect-ratio >/g'
 SEDSTR="$SEDSTR;"'s/<\/DisplayAspectRatio>/<\/inm:Display-Aspect-ratio >/g'
 #this changes mmkv timecode  ; to :. Monitor this as it may mess other things up.
-SEDSTR="$SEDSTR;"'s/;/:/g'
+#SEDSTR="$SEDSTR;"'s/;/:/g'
 
 sed -i.backup "$SEDSTR" "$1.mkv_mediainfo_inmagic.xml"
 
-#the first one deletes lines that do not start with in magic but doesn't work for long strings as they move to a new line. the second one deletes everything starting with inm. the ! negates the inclusion." http://stackoverflow.com/a/8068399/2188572
+#the first one deletes lines that do not start with in magic but doesn't work for long strings as they move to a new line. 
+#the second one deletes everything starting with inm. the ! negates the inclusion." http://stackoverflow.com/a/8068399/2188572
 sed -i '' '/^<inm/!d' "$1.mkv_mediainfo_inmagic.xml"
 #sed -i '' '/^<\/inm/d' "$1.mkv_mediainfo_inmagic.xml"
 
@@ -223,26 +222,17 @@ echo '</inm:Results>' >> "$1.mkv_mediainfo_inmagic.xml"
 
 #can be harvested via this script
 #<inm:Filename />
-#<inm:DAccession-number />
 #<inm:DHabitat />
 #<inm:LTO-creation-date />
 #<inm:DTransfer-source />
 #<inm:DTelecine-facility />
 #<inm:DProcess />
 #<inm:D-operator-notes />
-#<inm:D-Duration />
-#<inm:Video-codec />
 #<inm:Wrapper />
-#<inm:D-video-height />
-#<inm:D-video-width />
 #<inm:D-Frame-rate />
 #<inm:D-Scan-type />
-#<inm:Display-Aspect-ratio />
-#<inm:D-Audio-codec />
 #<inm:D-File-size />
 #<inm:Active-picture-ratio />
-#<inm:D-Checksum />
-
 #more in magic fields to add in
 #<inm:Title-Main />
 #<inm:Title-Series />
@@ -250,6 +240,7 @@ echo '</inm:Results>' >> "$1.mkv_mediainfo_inmagic.xml"
 
 
 #http://stackoverflow.com/a/21950403/2188572
+#add static inmagic xml header/footers
 sed -i '' '1i\
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
 ' "$1.mkv_mediainfo_inmagic.xml"
@@ -263,17 +254,13 @@ sed -i '' '4i\
 <inm:Record setEntry="0">
 ' "$1.mkv_mediainfo_inmagic.xml"
 
+#removes duplicate lines without re-sorting everything.
 awk '!a[$0]++' "$1.mkv_mediainfo_inmagic.xml" > "$1.mkv_mediainfo_inmagic_final.xml"
 
-#prints the contents of inmagic sml to terminal
-
-
-
+#prints the contents of inmagic xml to terminal
 cat "$1.mkv_mediainfo_inmagic_final.xml" 
 
-
-
-
+#Final move of gnerated files to final destination. This should happen automatically, current system is messy.
 mv "$1.mkv_mediainfo_inmagic_final.xml" "$inmagic"
 mv "$1.mkv_mediainfo_inmagic.xml" "$tmp"
 mv "$1.mkv_mediainfo_inmagic.xml.backup" "$tmp"
@@ -282,12 +269,8 @@ mv "$1_ffv1_mediainfo.xml" "$video"
 
 #change dir is necessary as relative paths don't seem to work well with recursive hashes
 cd "$sourcepath"
+
 #ler - l=relative paths e=shows time remaining r=recursive
 md5deep -ler "$filenoext" > "$sourcepath/$filenoext.md5"
 
-
 echo "You should now have an xml file that can be ingested into DB/Textworks for SQL. When importing into Inmagic, DO NOT enable 'Check for matching records'"
-
-
-
-
