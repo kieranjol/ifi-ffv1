@@ -139,7 +139,7 @@ done
 #transcode to ffv1 and make framemd5 of source
 ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -aspect 4:3 -c:a copy -dn "$1.mkv" -f framemd5 -an "$1.framemd5" 2> "$1.mkv.log"
 #make framemd5 of ffv1
-ffmpeg -i "$1.mkv" -f framemd5 -an "$1"_output.framemd5 
+ffmpeg -i "$1.mkv" -f framemd5 -an "$1"_output.framemd5 2> "$1.mkv.framemd5.log"
 
 
 #http://stackoverflow.com/a/1379904/2188572 looks like it might be a better option
