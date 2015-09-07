@@ -5,6 +5,7 @@
 #This stores various file/path names for later use.
 sourcepath="$(dirname "$1")" 
 filename="$(basename "$1")"
+archived_filename="$(basename "$1.mkv")"
 
 #Stores just the filename without the .extension. 
 filenoext="${filename%.*}"
@@ -216,6 +217,7 @@ md5=($(md5deep "$1.mkv"))
 echo '<inm:D-Checksum >'$md5'</inm:D-Checksum >' >> "$1.mkv_mediainfo_inmagic.xml"
 
 echo "$tod" >> "$1.mkv_mediainfo_inmagic.xml"
+echo '<inm:Filename >'$archived_filename'</inm:Filename>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '</inm:Record>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '</inm:Recordset>' >> "$1.mkv_mediainfo_inmagic.xml"
 echo '</inm:Results>' >> "$1.mkv_mediainfo_inmagic.xml"
@@ -273,4 +275,6 @@ cd "$sourcepath"
 #ler - l=relative paths e=shows time remaining r=recursive
 md5deep -ler "$filenoext" > "$sourcepath/$filenoext.md5"
 
+
 echo "You should now have an xml file that can be ingested into DB/Textworks for SQL. When importing into Inmagic, DO NOT enable 'Check for matching records'"
+
