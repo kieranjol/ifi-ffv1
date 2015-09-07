@@ -24,8 +24,7 @@ else
 	mkdir "$sourcepath/$filenoext/inmagic"
 	mkdir "$sourcepath/$filenoext/fixity"
 	mkdir "$sourcepath/$filenoext/video"
-	mkdir "$sourcepath/$filenoext/mezzanine"
-	mkdir "$sourcepath/$filenoext/proxy"
+	mkdir "$sourcepath/$filenoext/logs"
 fi
 
 #Creating variables for the directories to make life easier later on.
@@ -36,6 +35,7 @@ tmp="$sourcepath/$filenoext/tmp"
 video="$sourcepath/$filenoext/video"
 mezzanine="$sourcepath/$filenoext/mezzanine"
 proxy="$sourcepath/$filenoext/proxy"
+logs="$sourcepath/$filenoext/logs"
 
 #Interview looking for non embedded metadata which will later be added to inmagic xml.
 echo "We will proceed with your FFV1 transcode but please fill in these Inmagic DB/Textworks fields first."
@@ -79,9 +79,12 @@ do
 		None)
 			break ;;
 		Prores)
+			mkdir "$sourcepath/$filenoext/mezzanine"
 			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn "$mezzanine/${filenoext}_PRORES.mov"
 			break ;;	
 		H264)
+		mkdir "$sourcepath/$filenoext/proxy"
+		
 		#https://trac.ffmpeg.org/wiki/FFprobeTips
 		framerate=($(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=noprint_wrappers=1:nokey=1 "$1"))
 
@@ -110,6 +113,9 @@ do
 		break;;
 		
 		Both)
+			mkdir "$sourcepath/$filenoext/mezzanine"
+			mkdir "$sourcepath/$filenoext/proxy"
+			
 			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn "$mezzanine/${filenoext}_PRORES.mov"
 			IFS=: read -a timecode < <(ffprobe -v error -show_entries stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1")
 			printf -v timecode "'%s\:%s\:%s\:%s'" "${timecode[@]}"
@@ -137,9 +143,9 @@ do
 	esac
 done	
 #transcode to ffv1 and make framemd5 of source
-ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -aspect 4:3 -c:a copy -dn "$1.mkv" -f framemd5 -an "$1.framemd5" 2> "$1.mkv.log"
+ffmpeg -i "$1" -map 0 -c:v ffv1 -level 3 -g 1 -aspect 4:3 -c:a copy -dn "$1.mkv" -f framemd5 -an "$1.framemd5" 2> "$logs/${filenoext}_transcode.log"
 #make framemd5 of ffv1
-ffmpeg -i "$1.mkv" -f framemd5 -an "$1"_output.framemd5 2> "$1.mkv.framemd5.log"
+ffmpeg -i "$1.mkv" -f framemd5 -an "$1"_output.framemd5 2> "$logs/${filenoext}_framemd5.log"
 
 
 #http://stackoverflow.com/a/1379904/2188572 looks like it might be a better option
@@ -275,6 +281,7 @@ cd "$sourcepath"
 
 #ler - l=relative paths e=shows time remaining r=recursive
 md5deep -ler "$filenoext" > "$sourcepath/$filenoext.md5"
+trash -rf $tmp
 
 
 echo "You should now have an xml file that can be ingested into DB/Textworks for SQL. When importing into Inmagic, DO NOT enable 'Check for matching records'"
