@@ -5,6 +5,7 @@
 #This stores various file/path names for later use.
 sourcepath="$(dirname "$1")" 
 filename="$(basename "$1")"
+# temporary. eventually, archived files should be video.mkv, rather video.mov.mkv
 archived_filename="$(basename "$1.mkv")"
 
 #Stores just the filename without the .extension. 
