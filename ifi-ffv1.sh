@@ -83,34 +83,54 @@ do
 			ffmpeg -i "$1" -map 0 -c:v prores -aspect 4:3 -c:a copy -dn "$mezzanine/${filenoext}_PRORES.mov"
 			break ;;	
 		H264)
-		mkdir "$sourcepath/$filenoext/proxy"
+			mkdir "$sourcepath/$filenoext/proxy"
 		
-		#https://trac.ffmpeg.org/wiki/FFprobeTips
-		framerate=($(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=noprint_wrappers=1:nokey=1 "$1"))
+			#https://trac.ffmpeg.org/wiki/FFprobeTips
+			size=($(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$1"))
+			if [[ "${size}" == "576" ]] ; then
+				textoptions=("fontsize=45:x=360-text_w/2:y=480")
+			elif [[ "${size}" == "486" || "${size}" == "480" ]] ; then
+				textoptions=("fontsize=45:x=360-text_w/2:y=400")
+			elif [[ "${size}" == "1080" || "${size}" == "1080" ]] ; then
+				textoptions=("fontsize=90:x=957-text_w/2:y=960")
+			fi
+		
+		###
+			framerate=($(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=noprint_wrappers=1:nokey=1 "$1"))
+			
+			tctest=($(ffprobe -v error -select_streams v:0 -show_entries format_tags=timecode:stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1"))
+			tctest2=($(ffprobe -v error -select_streams v:0 -show_entries stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1"))
+			if [[ "${tctest}" == "" ]] ; then
+				ffmpeg -i "$1" -c:v libx264 -crf 19 -pix_fmt yuv420p -vf drawtext="fontsize=45":"fontfile=/Library/Fonts/Arial\ Black.ttf:fontcolor=white:timecode='00\:00\:00\:00':rate=$framerate:boxcolor=0x000000AA:box=1:x=360-text_w/2:y=480" "$proxy/${filenoext}_BITC.mov"
+			elif [[ "${tctest2}" == "" ]] ; then
+				IFS=: read -a timecode < <(ffprobe -v error -show_entries format_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1")
+			else
+				IFS=: read -a timecode < <(ffprobe -v error -show_entries stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1")
 
+			fi
+				printf -v timecode "'%s\:%s\:%s\:%s'" "${timecode[@]}"
+				echo "$timecode"
 
-		#https://trac.ffmpeg.org/wiki/FFprobeTips
-		IFS=: read -a timecode < <(ffprobe -v error -show_entries stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1")
-		printf -v timecode "'%s\:%s\:%s\:%s'" "${timecode[@]}"
-		echo "$timecode"
+				drawtext_options=(
+				    fontsize=45
+				    fontfile="/Library/Fonts/Arial Black.ttf"
+				    fontcolor=white
+				    timecode="$timecode"
+				    rate="$framerate"
+				    boxcolor=0x000000AA
+				    box=1
+					$textoptions
+				    #x=360-text_w/2
+				    #y=480
+				)
 
-		drawtext_options=(
-		    fontsize=45
-		    fontfile="/Library/Fonts/Arial Black.ttf"
-		    fontcolor=white
-		    timecode="$timecode"
-		    rate="$framerate"
-		    boxcolor=0x000000AA
-		    box=1
-		    x=360-text_w/2
-		    y=480
-		)
-
-		drawtext_options=$(IFS=:; echo "${drawtext_options[*]}")
-		ffmpeg -i "$1" -c:v libx264 -crf 23 -pix_fmt yuv420p -vf \
-		    drawtext="$drawtext_options" \
-		    "$proxy/${filenoext}_BITC.mov"
-		break;;
+				drawtext_options=$(IFS=:; echo "${drawtext_options[*]}")
+				ffmpeg -i "$1" -c:v libx264 -crf 19 -pix_fmt yuv420p -vf \
+				    drawtext="$drawtext_options" \
+				    "$proxy/${filenoext}_BITC.mov"
+				break;;
+				
+				###
 		
 		Both)
 			mkdir "$sourcepath/$filenoext/mezzanine"
