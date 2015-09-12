@@ -244,13 +244,14 @@ echo "You should now have an xml file that can be ingested into DB/Textworks for
 		
 			#https://trac.ffmpeg.org/wiki/FFprobeTips
 			size=($(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$1"))
-			if [[ "${size}" == "576" ]] ; then
-				textoptions=("fontsize=45:x=360-text_w/2:y=480")
-			elif [[ "${size}" == "486" || "${size}" == "480" ]] ; then
-				textoptions=("fontsize=45:x=360-text_w/2:y=400")
-			elif [[ "${size}" == "1080" || "${size}" == "1080" ]] ; then
-				textoptions=("fontsize=90:x=957-text_w/2:y=960")
-			fi
+			size=($(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$1"))
+			wsize=($(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 "$1"))
+
+			ycor=($(bc <<< $size/1.20))
+			xcor=($(bc <<< $wsize/2))
+			font=($(bc <<< $size/12))
+
+			textoptions=("fontsize=$font:x=$xcor-text_w/2:y=$ycor")
 		
 		###
 			framerate=($(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=noprint_wrappers=1:nokey=1 "$1"))
@@ -258,7 +259,7 @@ echo "You should now have an xml file that can be ingested into DB/Textworks for
 			tctest=($(ffprobe -v error -select_streams v:0 -show_entries format_tags=timecode:stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1"))
 			tctest2=($(ffprobe -v error -select_streams v:0 -show_entries stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1"))
 			if [[ "${tctest}" == "" ]] ; then
-				ffmpeg -i "$1" -c:v libx264 -crf 19 -pix_fmt yuv420p -vf drawtext="fontsize=45":"fontfile=/Library/Fonts/Arial\ Black.ttf:fontcolor=white:timecode='00\:00\:00\:00':rate=$framerate:boxcolor=0x000000AA:box=1:x=360-text_w/2:y=480" "$proxy/${filenoext}_BITC.mov" ;exit
+				ffmpeg -i "$1" -c:v libx264 -crf 19 -pix_fmt yuv420p -vf drawtext="fontsize=$font":"fontfile=/Library/Fonts/Arial\ Black.ttf:fontcolor=white:timecode='00\:00\:00\:00':rate=$framerate:boxcolor=0x000000AA:box=1:x=$xcor-text_w/2:y=$ycor" "$proxy/${filenoext}_BITC.mov" ;exit
 			elif [[ "${tctest2}" == "" ]] ; then
 				IFS=: read -a timecode < <(ffprobe -v error -show_entries format_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1")
 			else
@@ -269,7 +270,6 @@ echo "You should now have an xml file that can be ingested into DB/Textworks for
 				echo "$timecode"
 
 				drawtext_options=(
-				    fontsize=45
 				    fontfile="/Library/Fonts/Arial Black.ttf"
 				    fontcolor=white
 				    timecode="$timecode"
@@ -277,9 +277,7 @@ echo "You should now have an xml file that can be ingested into DB/Textworks for
 				    boxcolor=0x000000AA
 				    box=1
 					$textoptions
-				    #x=360-text_w/2
-				    #y=480
-				)
+				    )
 
 				drawtext_options=$(IFS=:; echo "${drawtext_options[*]}")
 				ffmpeg -i "$1" -c:v libx264 -crf 19 -pix_fmt yuv420p -vf \
