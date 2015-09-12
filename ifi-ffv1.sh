@@ -258,7 +258,7 @@ echo "You should now have an xml file that can be ingested into DB/Textworks for
 			tctest=($(ffprobe -v error -select_streams v:0 -show_entries format_tags=timecode:stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1"))
 			tctest2=($(ffprobe -v error -select_streams v:0 -show_entries stream_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1"))
 			if [[ "${tctest}" == "" ]] ; then
-				ffmpeg -i "$1" -c:v libx264 -crf 19 -pix_fmt yuv420p -vf drawtext="fontsize=45":"fontfile=/Library/Fonts/Arial\ Black.ttf:fontcolor=white:timecode='00\:00\:00\:00':rate=$framerate:boxcolor=0x000000AA:box=1:x=360-text_w/2:y=480" "$proxy/${filenoext}_BITC.mov" ;break
+				ffmpeg -i "$1" -c:v libx264 -crf 19 -pix_fmt yuv420p -vf drawtext="fontsize=45":"fontfile=/Library/Fonts/Arial\ Black.ttf:fontcolor=white:timecode='00\:00\:00\:00':rate=$framerate:boxcolor=0x000000AA:box=1:x=360-text_w/2:y=480" "$proxy/${filenoext}_BITC.mov" ;exit
 			elif [[ "${tctest2}" == "" ]] ; then
 				IFS=: read -a timecode < <(ffprobe -v error -show_entries format_tags=timecode -of default=noprint_wrappers=1:nokey=1 "$1")
 			else
