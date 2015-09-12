@@ -244,7 +244,6 @@ echo "You should now have an xml file that can be ingested into DB/Textworks for
 		
 			#https://trac.ffmpeg.org/wiki/FFprobeTips
 			size=($(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$1"))
-			size=($(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$1"))
 			wsize=($(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 "$1"))
 
 			ycor=($(bc <<< $size/1.20))
