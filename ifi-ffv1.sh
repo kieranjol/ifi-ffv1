@@ -3,6 +3,8 @@
 #http://unix.stackexchange.com/questions/65510/how-do-i-append-text-to-the-beginning-and-end-of-multiple-text-files-in-bash 
 #http://stackoverflow.com/a/965072/2188572
 #This stores various file/path names for later use.
+
+
 sourcepath="$(dirname "$1")" 
 filename="$(basename "$1")"
 # temporary. eventually, archived files should be video.mkv, rather video.mov.mkv
@@ -239,7 +241,7 @@ trash -rf $tmp
 
 echo "You should now have an xml file that can be ingested into DB/Textworks for SQL. When importing into Inmagic, DO NOT enable 'Check for matching records'"
 
-	if [[ "${choice}" == "H264" || "Both" ]] ; then
+	if [ "${choice}" == "H264" -o "${choice}" == "Both" ] ; then
 		mkdir "$sourcepath/$filenoext/proxy"
 		
 			#https://trac.ffmpeg.org/wiki/FFprobeTips
@@ -291,4 +293,6 @@ echo "You should now have an xml file that can be ingested into DB/Textworks for
 				fi
 
 fi
+
+done
 
