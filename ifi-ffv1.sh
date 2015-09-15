@@ -4,7 +4,7 @@
 #http://stackoverflow.com/a/965072/2188572
 #This stores various file/path names for later use.
 
-
+#uses variables for the path name, as well as the filename with extension.
 sourcepath="$(dirname "$1")" 
 filename="$(basename "$1")"
 # temporary. eventually, archived files should be video.mkv, rather video.mov.mkv
@@ -154,7 +154,7 @@ SEDSTR="$SEDSTR;"'s/<\/DisplayAspectRatio>/<\/inm:Display-Aspect-ratio >/g'
 
 sed -i.backup "$SEDSTR" "$1.mkv_mediainfo_inmagic.xml"
 
-#the first one deletes lines that do not start with in magic but doesn't work for long strings as they move to a new line. 
+#the first one deletes lines that do not start with inmagic but doesn't work for long strings as they move to a new line. 
 #the second one deletes everything starting with inm. the ! negates the inclusion." http://stackoverflow.com/a/8068399/2188572
 sed -i '' '/^<inm/!d' "$1.mkv_mediainfo_inmagic.xml"
 #sed -i '' '/^<\/inm/d' "$1.mkv_mediainfo_inmagic.xml"
@@ -247,7 +247,7 @@ echo "You should now have an xml file that can be ingested into DB/Textworks for
 			#https://trac.ffmpeg.org/wiki/FFprobeTips
 			size=($(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$1"))
 			wsize=($(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 "$1"))
-
+#bc is required for decimals.
 			ycor=($(bc <<< $size/1.20))
 			xcor=($(bc <<< $wsize/2))
 			font=($(bc <<< $size/12))
@@ -294,5 +294,5 @@ echo "You should now have an xml file that can be ingested into DB/Textworks for
 
 fi
 
-done
+
 
