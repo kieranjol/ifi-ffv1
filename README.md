@@ -1,4 +1,6 @@
-# ifi-ffv1
+# ifi-ffv1 - <b>DEPRECATED!</b> - Development will now be focused on the python version - https://github.com/kieranjol/pyffv1md5 <br>
+
+
  FFv1/lossless verification/Inmagic DB Textworks mediainfo ingest roughly inspired by Dave Rice's 'makelossless' https://github.com/dericed/mediamicroservices/blob/master/makelossless
  
  This will do the following to your v210.mov
